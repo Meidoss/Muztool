@@ -1,0 +1,2897 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Muztool - Инструменты для музыкантов</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            /* Светлая тема (по умолчанию) */
+            --bg-color: #f8f5f2;
+            --text-color: #5a4a42;
+            --panel-bg: white;
+            --border-color: #eee9e5;
+            --primary-color: #8a7a72;
+            --secondary-color: #a8a097;
+            --string-color: rgba(138, 122, 114, 0.3);
+            --fret-wire-color: rgba(138, 122, 114, 0.12);
+            --nut-color: #c5b8b0;
+            --note-bg: rgba(255, 255, 255, 0.95);
+            --note-border: rgba(138, 122, 114, 0.2);
+            --note-text: #8a4a42;
+            --shadow-color: rgba(138, 122, 114, 0.08);
+            --hover-bg: #e8e2dd;
+            --active-bg: #8a7a72;
+            --active-color: white;
+            --fretboard-bg: linear-gradient(to bottom, #ede6e1 0%, #e5ddd7 100%);
+            
+            /* Цвета октав для светлой темы */
+            --octave-0: #ffd6e0;
+            --octave-1: #ffd6f4;
+            --octave-2: #e0d6ff;
+            --octave-3: #d6e7ff;
+            --octave-4: #d6fff0;
+            --octave-5: #f0ffd6;
+            --octave-6: #fff9d6;
+            --octave-7: #ffe7d6;
+            --octave-8: #ffd6d6;
+            
+            /* Цвета гамм для светлой темы */
+            --scale-tonic-bg: #d6fff0;
+            --scale-tonic-border: #a8ffd8;
+            --scale-note-bg: #d6e7ff;
+            --scale-note-border: #a8c8ff;
+            --scale-blues-bg: #ffd6f4;
+            --scale-blues-border: #ffa8e7;
+        }
+        
+        .dark-theme {
+            /* Тёмная тема - УЛУЧШЕННАЯ читаемость */
+            --bg-color: #1a1a1a;
+            --text-color: #e0e0e0;
+            --panel-bg: #2a2a2a;
+            --border-color: #404040;
+            --primary-color: #9a8d85;
+            --secondary-color: #6d6d6d;
+            --string-color: rgba(154, 141, 133, 0.4);
+            --fret-wire-color: rgba(154, 141, 133, 0.15);
+            --nut-color: #5a4d45;
+            --note-bg: rgba(42, 42, 42, 0.95);
+            --note-border: rgba(154, 141, 133, 0.4);
+            --note-text: #e0e0e0;
+            --shadow-color: rgba(0, 0, 0, 0.4);
+            --hover-bg: #3a3a3a;
+            --active-bg: #9a8d85;
+            --active-color: #1a1a1a;
+            --fretboard-bg: linear-gradient(to bottom, #2a2a2a 0%, #222222 100%);
+            
+            /* УЛУЧШЕННЫЕ цвета октав для тёмной темы */
+            --octave-0: #4a2c39;
+            --octave-1: #4a2c44;
+            --octave-2: #3a2c4a;
+            --octave-3: #2c3a4a;
+            --octave-4: #2c4a3c;
+            --octave-5: #3a4a2c;
+            --octave-6: #4a442c;
+            --octave-7: #4a3a2c;
+            --octave-8: #4a2c2c;
+            
+            /* УЛУЧШЕННЫЕ цвета гамм для тёмной темы */
+            --scale-tonic-bg: #1e3a31;
+            --scale-tonic-border: #2c5a47;
+            --scale-note-bg: #1e2e3a;
+            --scale-note-border: #2c4a5a;
+            --scale-blues-bg: #3a1e35;
+            --scale-blues-border: #5a2c52;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.4;
+            overflow-x: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            position: relative;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 300;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+        
+        .menu-toggle {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            padding: 10px 20px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            z-index: 100;
+        }
+        
+        .menu-toggle:hover {
+            background: var(--secondary-color);
+            transform: translateY(-50%) scale(1.05);
+        }
+        
+        .app {
+            background: var(--panel-bg);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 4px 20px var(--shadow-color);
+            margin-bottom: 30px;
+            border: 1px solid var(--border-color);
+            width: 100%;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+            box-sizing: border-box;
+        }
+        
+        .string-controls {
+            margin-bottom: 25px;
+            padding-bottom: 25px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .string-count-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .string-count-label {
+            font-size: 0.85rem;
+            color: var(--primary-color);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .string-count-btn {
+            padding: 8px 16px;
+            background: var(--hover-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-color);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .string-count-btn:hover {
+            background: var(--hover-bg);
+            border-color: var(--secondary-color);
+        }
+        
+        .string-count-display {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            min-width: 30px;
+            text-align: center;
+        }
+        
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 15px;
+        }
+        
+        .tuning-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .tuning-group label {
+            font-size: 0.85rem;
+            color: var(--primary-color);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        select {
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background: var(--panel-bg);
+            color: var(--text-color);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%238a7a72' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            padding-right: 40px;
+        }
+        
+        .dark-theme select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%239a8d85' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+        }
+        
+        select:hover {
+            border-color: var(--secondary-color);
+        }
+        
+        select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(138, 122, 114, 0.1);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+            justify-content: center;
+        }
+        
+        .action-btn {
+            padding: 10px 18px;
+            background: var(--hover-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-color);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        
+        .action-btn:hover {
+            background: var(--hover-bg);
+            border-color: var(--secondary-color);
+        }
+        
+        .action-btn.active {
+            background: var(--active-bg);
+            border-color: var(--active-bg);
+            color: var(--active-color);
+        }
+        
+        .fretboard-container {
+            padding: 30px 0 20px;
+            width: 100%;
+            position: relative;
+            overflow-x: auto;
+        }
+        
+        .fretboard-wrapper {
+            width: 1200px;
+            position: relative;
+            margin: 0 auto;
+        }
+        
+        /* Кнопки над грифом для изменения строя - ИСПРАВЛЕНО: смещено влево */
+        .fretboard-header {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
+            padding-left: 50px; /* Совмещаем с началом грифа */
+        }
+        
+        .tune-buttons {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .tune-btn {
+            padding: 8px 16px;
+            background: var(--hover-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-color);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: 40px;
+        }
+        
+        .tune-btn:hover {
+            background: var(--hover-bg);
+            border-color: var(--secondary-color);
+        }
+        
+        /* Ползунок для прямоугольных маркеров - ИСПРАВЛЕНО: короче */
+        .marker-slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .marker-slider-label {
+            font-size: 0.85rem;
+            color: var(--primary-color);
+            white-space: nowrap;
+        }
+        
+        .marker-slider {
+            -webkit-appearance: none;
+            width: 100px; /* ИСПРАВЛЕНО: короче (было 120px) */
+            height: 6px;
+            border-radius: 3px;
+            background: var(--border-color);
+            outline: none;
+        }
+        
+        .marker-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+        }
+        
+        .marker-slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+            border: none;
+        }
+        
+        /* Гриф */
+        .fretboard {
+            height: 260px;
+            position: relative;
+            background: var(--fretboard-bg);
+            border-radius: 12px 12px 8px 8px;
+            overflow: hidden;
+            box-shadow: inset 0 0 0 1px rgba(138, 122, 114, 0.1);
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+        
+        /* Струны */
+        .string {
+            position: absolute;
+            left: 50px;
+            right: 0;
+            height: 1px;
+            background: var(--string-color);
+            z-index: 1;
+        }
+        
+        /* Ладовые порожки */
+        .fret-wire {
+            position: absolute;
+            top: 0;
+            width: 1.5px;
+            height: 100%;
+            background: var(--fret-wire-color);
+            z-index: 2;
+        }
+        
+        /* Порожек */
+        .nut {
+            position: absolute;
+            left: 45px;
+            top: 0;
+            width: 8px;
+            height: 100%;
+            background: var(--nut-color);
+            z-index: 3;
+            box-shadow: 
+                2px 0 3px rgba(0, 0, 0, 0.1),
+                inset -1px 0 2px rgba(255, 255, 255, 0.5);
+        }
+        
+        /* Ноты */
+        .note {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--note-bg);
+            border: 1px solid var(--note-border);
+            color: var(--note-text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.2s;
+            box-shadow: 0 1px 3px rgba(138, 122, 114, 0.1);
+        }
+        
+        .note:hover {
+            transform: scale(1.1);
+            border-color: var(--primary-color);
+            box-shadow: 0 3px 6px rgba(138, 122, 114, 0.15);
+        }
+        
+        .note.highlight {
+            background: var(--active-bg) !important;
+            color: var(--active-color) !important;
+            border-color: var(--active-bg) !important;
+            box-shadow: 0 3px 8px rgba(138, 122, 114, 0.25) !important;
+        }
+        
+        /* Цвета октав - ТЕПЕРЬ ИСПОЛЬЗУЮТ CSS ПЕРЕМЕННЫЕ */
+        .octave-0 { background-color: var(--octave-0) !important; }
+        .octave-1 { background-color: var(--octave-1) !important; }
+        .octave-2 { background-color: var(--octave-2) !important; }
+        .octave-3 { background-color: var(--octave-3) !important; }
+        .octave-4 { background-color: var(--octave-4) !important; }
+        .octave-5 { background-color: var(--octave-5) !important; }
+        .octave-6 { background-color: var(--octave-6) !important; }
+        .octave-7 { background-color: var(--octave-7) !important; }
+        .octave-8 { background-color: var(--octave-8) !important; }
+        
+        /* Цвета для гамм - ТЕПЕРЬ ИСПОЛЬЗУЮТ CSS ПЕРЕМЕННЫЕ */
+        .scale-tonic {
+            background-color: var(--scale-tonic-bg) !important;
+            border-color: var(--scale-tonic-border) !important;
+        }
+        
+        .scale-note {
+            background-color: var(--scale-note-bg) !important;
+            border-color: var(--scale-note-border) !important;
+        }
+        
+        .scale-blues {
+            background-color: var(--scale-blues-bg) !important;
+            border-color: var(--scale-blues-border) !important;
+        }
+        
+        /* Открытые ноты */
+        .open-note {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--note-bg);
+            border: 1px solid var(--note-border);
+            color: var(--note-text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            z-index: 11;
+            left: 10px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s;
+        }
+        
+        .open-note:hover {
+            transform: scale(1.1);
+            border-color: var(--primary-color);
+            box-shadow: 0 3px 6px rgba(138, 122, 114, 0.15);
+        }
+        
+        /* Маркеры ладов - КРУГЛЫЕ */
+        .fret-marker {
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: rgba(138, 122, 114, 0.22);
+            z-index: 4;
+            box-shadow: 
+                0 1px 2px rgba(0,0,0,0.1),
+                inset 0 1px 1px rgba(255,255,255,0.3);
+        }
+        
+        .fret-marker.double {
+            width: 18px; /* ИЗМЕНЕНО: теперь такой же размер */
+            height: 18px; /* ИЗМЕНЕНО: теперь такой же размер */
+        }
+        
+        /* ВЕРТИКАЛЬНЫЕ ПРЯМОУГОЛЬНИКИ (через ползунок) */
+        .fret-marker.vertical {
+            width: 8px;
+            height: 60px;
+            border-radius: 3px;
+            background: rgba(138, 122, 114, 0.25);
+            z-index: 4;
+            box-shadow: 
+                0 1px 2px rgba(0,0,0,0.1),
+                inset 0 1px 1px rgba(255,255,255,0.3);
+        }
+        
+        .fret-marker.vertical.double {
+            width: 8px;
+        }
+        
+        /* Номера ладов сверху */
+        .fret-numbers {
+            position: absolute;
+            top: 8px;
+            left: 50px;
+            display: flex;
+            width: 1150px;
+        }
+        
+        .fret-number {
+            width: 46px;
+            text-align: center;
+            font-size: 11px;
+            color: var(--secondary-color);
+            font-weight: 500;
+            padding: 3px 0;
+        }
+        
+        .fret-number.special {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+        
+        /* Выезжающее меню */
+        .slide-menu {
+            position: fixed;
+            left: -320px;
+            top: 0;
+            width: 300px;
+            height: 100vh;
+            background: var(--panel-bg);
+            box-shadow: 2px 0 20px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            transition: left 0.3s ease;
+            padding: 20px;
+            overflow-y: auto;
+            border-right: 1px solid var(--border-color);
+        }
+        
+        .slide-menu.open {
+            left: 0;
+        }
+        
+        /* Стиль для левой границы окна, которая будет триггером для меню - УВЕЛИЧЕНО В 2 РАЗА */
+        .left-edge-trigger {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 80px; /* УВЕЛИЧЕНО В 2 РАЗА (было 40px) */
+            height: 100%;
+            z-index: 500;
+            cursor: pointer;
+        }
+        
+        .menu-header {
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .menu-section {
+            margin-bottom: 25px;
+        }
+        
+        .menu-section h3 {
+            color: var(--primary-color);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+        
+        .menu-btn {
+            width: 100%;
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            background: var(--hover-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-color);
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+        }
+        
+        .menu-btn:hover {
+            background: var(--hover-bg);
+            border-color: var(--secondary-color);
+        }
+        
+        .menu-btn.active {
+            background: var(--active-bg);
+            border-color: var(--active-bg);
+            color: var(--active-color);
+        }
+        
+        .menu-btn.scale {
+            background: var(--hover-bg);
+            border-color: var(--border-color);
+        }
+        
+        .menu-btn.scale.active {
+            background: var(--active-bg);
+            border-color: var(--active-bg);
+            color: var(--active-color);
+        }
+        
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 999;
+            display: none;
+        }
+        
+        .menu-overlay.show {
+            display: block;
+        }
+        
+        .tonic-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px;
+        }
+        
+        .tonic-btn {
+            padding: 6px 12px;
+            background: var(--hover-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-color);
+        }
+        
+        .tonic-btn:hover {
+            background: var(--hover-bg);
+        }
+        
+        .tonic-btn.active {
+            background: var(--active-bg);
+            color: var(--active-color);
+            border-color: var(--active-bg);
+        }
+        
+        /* Стили для комбинированного выбора ноты с октавой в настройках струн */
+        .tuning-select-container {
+            width: 100%;
+            position: relative;
+        }
+        
+        .tuning-select {
+            width: 100%;
+        }
+        
+        /* Убраны стили для отдельного селектора октавы в настройках струн */
+        
+        .note-info {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 25px;
+            display: none;
+            box-shadow: 0 2px 8px var(--shadow-color);
+        }
+        
+        .note-info.active {
+            display: block;
+        }
+        
+        .note-info h3 {
+            color: var(--primary-color);
+            font-weight: 400;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .note-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-top: 12px;
+        }
+        
+        .detail {
+            background: var(--hover-bg);
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .detail .label {
+            font-size: 0.75rem;
+            color: var(--secondary-color);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+        
+        .detail .value {
+            font-size: 1rem;
+            color: var(--text-color);
+            font-weight: 500;
+        }
+        
+        /* Стили для селектора октавы в информации о ноте */
+        .detail select {
+            width: 100%;
+            margin-top: 4px;
+            font-size: 0.9rem;
+            padding: 8px 12px;
+            background: var(--panel-bg);
+        }
+        
+        .hint {
+            color: var(--secondary-color);
+            font-size: 0.85rem;
+            text-align: center;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .scale-info {
+            font-size: 0.8rem;
+            color: var(--text-color);
+            margin-top: 10px;
+            padding: 12px;
+            background: var(--hover-bg);
+            border-radius: 8px;
+            border-left: 3px solid var(--primary-color);
+            line-height: 1.5;
+        }
+        
+        .scale-info strong {
+            color: var(--primary-color);
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .scale-info .app-info {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed var(--border-color);
+            font-style: italic;
+            color: var(--secondary-color);
+        }
+        
+        .scale-info .color-legend {
+            margin-top: 10px;
+            font-size: 0.75rem;
+        }
+        
+        .scale-info .color-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 5px;
+        }
+        
+        .scale-info .color-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+            border: 1px solid var(--border-color);
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        
+        .scale-info .color-dot.tonic {
+            background-color: var(--scale-tonic-bg);
+            border-color: var(--scale-tonic-border);
+        }
+        
+        .scale-info .color-dot.note {
+            background-color: var(--scale-note-bg);
+            border-color: var(--scale-note-border);
+        }
+        
+        .scale-info .color-dot.blues {
+            background-color: var(--scale-blues-bg);
+            border-color: var(--scale-blues-border);
+        }
+        
+        .scale-info .color-text {
+            flex: 1;
+            line-height: 1.3;
+            min-width: 0; /* Исправление для текста, который заезжал под кружок */
+            word-wrap: break-word;
+        }
+        
+        .theme-toggle {
+            margin-top: 10px;
+            width: 100%;
+            padding: 10px 15px;
+            background: var(--hover-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-color);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        
+        .theme-toggle:hover {
+            background: var(--hover-bg);
+            border-color: var(--secondary-color);
+        }
+        
+        .theme-toggle span {
+            flex-grow: 1;
+            text-align: left;
+        }
+        
+        .theme-icon {
+            font-size: 1.2rem;
+        }
+        
+        /* Футер с контактной информацией */
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            padding: 20px;
+            color: var(--secondary-color);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .footer a {
+            color: var(--primary-color);
+            text-decoration: none;
+            cursor: text;
+        }
+        
+        .footer a:hover {
+            text-decoration: none;
+        }
+        
+        /* Стили для пресет импорта/экспорта */
+        .preset-tools {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .preset-textarea {
+            width: 100%;
+            height: 80px;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--hover-bg);
+            color: var(--text-color);
+            font-size: 0.8rem;
+            resize: vertical;
+            margin-bottom: 10px;
+            font-family: monospace;
+        }
+        
+        .preset-textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+        
+        .preset-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .preset-btn {
+            flex: 1;
+            padding: 8px 12px;
+            background: var(--hover-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-color);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        
+        .preset-btn:hover {
+            background: var(--hover-bg);
+            border-color: var(--secondary-color);
+        }
+        
+        .preset-btn.copy {
+            background: var(--scale-tonic-bg);
+            border-color: var(--scale-tonic-border);
+        }
+        
+        .preset-btn.apply {
+            background: var(--scale-note-bg);
+            border-color: var(--scale-note-border);
+        }
+        
+        /* Уведомления */
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            max-width: 300px;
+            transition: all 0.3s;
+        }
+        
+        .notification.show {
+            display: flex;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .notification.hide {
+            animation: slideOut 0.3s ease forwards;
+        }
+        
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+        
+        .notification-icon {
+            font-size: 1.2rem;
+            color: var(--primary-color);
+        }
+        
+        .notification-message {
+            flex: 1;
+            font-size: 0.85rem;
+        }
+        
+        @media (max-width: 1300px) {
+            .fretboard-wrapper {
+                transform: scale(0.9);
+                transform-origin: center left;
+                width: 1080px;
+            }
+            
+            .fret-numbers {
+                transform: scale(0.9);
+                transform-origin: center left;
+                width: 1035px;
+            }
+        }
+        
+        @media (max-width: 1100px) {
+            .fretboard-wrapper {
+                transform: scale(0.8);
+                width: 960px;
+            }
+            
+            .fret-numbers {
+                transform: scale(0.8);
+                width: 920px;
+            }
+            
+            .action-buttons {
+                justify-content: center;
+            }
+            
+            .fretboard-header {
+                flex-wrap: wrap;
+                gap: 10px;
+                padding-left: 40px;
+            }
+            
+            /* Убраны стили для селектора октавы в настройках струн */
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .app {
+                padding: 20px 15px;
+            }
+            
+            .fretboard-wrapper {
+                transform: scale(0.7);
+                width: 840px;
+            }
+            
+            .fret-numbers {
+                transform: scale(0.7);
+                width: 805px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .controls {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .action-buttons {
+                gap: 8px;
+            }
+            
+            .action-btn {
+                padding: 8px 12px;
+                font-size: 0.8rem;
+            }
+            
+            .slide-menu {
+                width: 280px;
+                left: -280px;
+            }
+            
+            .string-count-controls {
+                justify-content: center;
+            }
+            
+            .fretboard-header {
+                flex-direction: column;
+                align-items: flex-start;
+                padding-left: 30px;
+                gap: 10px;
+            }
+            
+            .tune-buttons {
+                order: 1;
+                width: 100%;
+            }
+            
+            .marker-slider-container {
+                order: 2;
+                width: 100%;
+            }
+            
+            .menu-toggle {
+                padding: 8px 12px;
+                font-size: 0.8rem;
+            }
+            
+            /* На мобильных устройствах скрываем триггер меню */
+            .left-edge-trigger {
+                display: none;
+            }
+            
+            /* Убраны стили для селектора октавы в настройках струн */
+        }
+        
+        /* Адаптация для мобильных устройств с маленькими экранами */
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                padding: 0;
+            }
+            
+            header {
+                padding: 10px;
+                margin-bottom: 15px;
+            }
+            
+            h1 {
+                font-size: 1.6rem;
+                margin-bottom: 5px;
+            }
+            
+            .app {
+                padding: 15px;
+                border-radius: 12px;
+            }
+            
+            .string-count-controls {
+                gap: 10px;
+                margin-bottom: 15px;
+            }
+            
+            .string-count-btn {
+                width: 35px;
+                height: 35px;
+                padding: 5px;
+            }
+            
+            .controls {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .tuning-group {
+                flex-direction: row;
+                align-items: center;
+                gap: 10px;
+            }
+            
+            .tuning-group label {
+                min-width: 80px;
+            }
+            
+            select {
+                padding: 10px;
+                font-size: 0.9rem;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .action-btn {
+                width: 100%;
+                text-align: center;
+                padding: 10px;
+            }
+            
+            .fretboard-container {
+                padding: 15px 0;
+            }
+            
+            .fretboard-header {
+                padding-left: 20px;
+            }
+            
+            .fretboard-wrapper {
+                transform: scale(0.6);
+                width: 840px;
+                transform-origin: top left;
+            }
+            
+            .fret-numbers {
+                transform: scale(0.6);
+                width: 805px;
+                transform-origin: top left;
+            }
+            
+            .slide-menu {
+                width: 85%;
+                left: -85%;
+            }
+            
+            .note-info {
+                padding: 15px;
+            }
+            
+            .note-details {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .left-edge-trigger {
+                display: none;
+            }
+        }
+        
+        /* Горизонтальная ориентация на мобильных */
+        @media (max-height: 600px) and (orientation: landscape) {
+            .container {
+                max-width: 100%;
+            }
+            
+            .app {
+                margin-bottom: 15px;
+            }
+            
+            .fretboard-container {
+                padding: 15px 0;
+            }
+            
+            .fretboard {
+                height: 180px;
+            }
+            
+            .fretboard-wrapper {
+                transform: scale(0.7);
+                width: 840px;
+            }
+            
+            .fret-numbers {
+                transform: scale(0.7);
+                width: 805px;
+            }
+            
+            .note-info {
+                margin-top: 15px;
+                padding: 15px;
+            }
+        }
+        
+        /* iPhone X, XS, 11 Pro и другие с "чёлкой" */
+        @supports (padding: max(0px)) {
+            body {
+                padding-left: max(10px, env(safe-area-inset-left));
+                padding-right: max(10px, env(safe-area-inset-right));
+                padding-top: max(10px, env(safe-area-inset-top));
+                padding-bottom: max(10px, env(safe-area-inset-bottom));
+            }
+            
+            .slide-menu {
+                padding-top: calc(20px + env(safe-area-inset-top));
+                padding-left: calc(20px + env(safe-area-inset-left));
+                padding-right: calc(20px + env(safe-area-inset-right));
+                padding-bottom: calc(20px + env(safe-area-inset-bottom));
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Триггер для выдвижения меню при наведении на левую границу окна - УВЕЛИЧЕН В 2 РАЗА -->
+    <div class="left-edge-trigger" id="leftEdgeTrigger"></div>
+    
+    <div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
+    
+    <!-- Уведомление -->
+    <div class="notification" id="notification">
+        <span class="notification-icon" id="notificationIcon">✓</span>
+        <span class="notification-message" id="notificationMessage"></span>
+    </div>
+    
+    <div class="slide-menu" id="slideMenu">
+        <div class="menu-header">🎸 Аппликатуры</div>
+        
+        <div class="menu-section">
+            <h3>Тоника гаммы</h3>
+            <div class="tonic-selector" id="tonicSelector">
+                <!-- Кнопки тоники будут созданы динамически -->
+            </div>
+            <div class="scale-info" id="scaleInfo">
+                Выберите тонику и гамму для отображения
+            </div>
+        </div>
+        
+        <div class="menu-section">
+            <h3>Пентатоники</h3>
+            <button class="menu-btn scale" onclick="setScale('minorPentatonic')" id="minorPentatonicBtn">
+                Минорная пентатоника
+            </button>
+            <button class="menu-btn scale" onclick="setScale('majorPentatonic')" id="majorPentatonicBtn">
+                Мажорная пентатоника
+            </button>
+            <button class="menu-btn scale" onclick="setScale('blues')" id="bluesBtn">
+                Блюзовая гамма
+            </button>
+        </div>
+        
+        <div class="menu-section">
+            <h3>Основные гаммы</h3>
+            <button class="menu-btn scale" onclick="setScale('major')" id="majorBtn">
+                Мажор (Ионийский)
+            </button>
+            <button class="menu-btn scale" onclick="setScale('naturalMinor')" id="naturalMinorBtn">
+                Натуральный минор
+            </button>
+            <button class="menu-btn scale" onclick="setScale('harmonicMinor')" id="harmonicMinorBtn">
+                Гармонический минор
+            </button>
+            <button class="menu-btn scale" onclick="setScale('melodicMinor')" id="melodicMinorBtn">
+                Мелодический минор
+            </button>
+        </div>
+        
+        <div class="menu-section">
+            <h3>Другие гаммы</h3>
+            <button class="menu-btn scale" onclick="setScale('dorian')" id="dorianBtn">
+                Дорийский лад
+            </button>
+            <button class="menu-btn scale" onclick="setScale('phrygian')" id="phrygianBtn">
+                Фригийский лад
+            </button>
+            <button class="menu-btn scale" onclick="setScale('mixolydian')" id="mixolydianBtn">
+                Миксолидийский лад
+            </button>
+            <button class="menu-btn scale" onclick="setScale('locrian')" id="locrianBtn">
+                Локрийский лад
+            </button>
+        </div>
+        
+        <div class="menu-section">
+            <h3>Другие режимы</h3>
+            <button class="menu-btn" onclick="toggleOctaveColors()" id="octaveBtn">
+                Показать октавы
+            </button>
+            <button class="theme-toggle" onclick="toggleTheme()" id="themeToggle">
+                <span>Тёмная тема</span>
+                <span class="theme-icon">🌙</span>
+            </button>
+        </div>
+        
+        <div class="menu-section">
+            <h3>Экспорт/Импорт пресета</h3>
+            <div class="preset-tools">
+                <textarea class="preset-textarea" id="presetTextarea" placeholder="Вставьте текст пресета..."></textarea>
+                <div class="preset-buttons">
+                    <button class="preset-btn copy" onclick="copyPreset()">Копировать пресет</button>
+                    <button class="preset-btn apply" onclick="applyPreset()">Применить пресет</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <header>
+            <button class="menu-toggle" onclick="toggleMenu()">☰ Аппликатуры</button>
+            <h1>Muztool</h1>
+        </header>
+        
+        <div class="app">
+            <div class="string-controls">
+                <div class="string-count-controls">
+                    <div class="string-count-label">Количество струн</div>
+                    <button class="string-count-btn" onclick="changeStringCount(-1)" id="decreaseStrings">−</button>
+                    <div class="string-count-display" id="stringCountDisplay">6</div>
+                    <button class="string-count-btn" onclick="changeStringCount(1)" id="increaseStrings">+</button>
+                </div>
+                
+                <div class="controls" id="stringControls">
+                    <!-- Сгенерируется динамически -->
+                </div>
+            </div>
+            
+            <div class="action-buttons" id="presetButtons">
+                <button class="action-btn active" onclick="setPreset('standard')">Standard (E A D G B E)</button>
+                <button class="action-btn" onclick="setPreset('dStandard')">D Standard (D G C F A D)</button>
+                <button class="action-btn" onclick="setPreset('dropC')">Drop C (C G C F A D)</button>
+                <button class="action-btn" onclick="setPreset('bass4')">Bass 4 (E A D G)</button>
+                <button class="action-btn" onclick="setPreset('bass5')">Bass 5 (B E A D G)</button>
+            </div>
+        </div>
+        
+        <div class="fretboard-container">
+            <div class="fretboard-header">
+                <div class="tune-buttons">
+                    <button class="tune-btn" onclick="tuneAll(-1)">↓ -½</button>
+                    <button class="tune-btn" onclick="tuneAll(1)">+½ ↑</button>
+                </div>
+                
+                <div class="marker-slider-container">
+                    <div class="marker-slider-label">Маркеры:</div>
+                    <input type="range" min="0" max="2" value="0" class="marker-slider" id="markerSlider">
+                    <div class="marker-slider-label" id="markerLabel">Круглые</div>
+                </div>
+            </div>
+            
+            <div class="fretboard-wrapper">
+                <div class="fret-numbers" id="fretNumbers"></div>
+                <div class="fretboard" id="fretboard"></div>
+            </div>
+        </div>
+        
+        <div class="note-info" id="noteInfo">
+            <h3 id="noteTitle">Выберите ноту на грифе</h3>
+            <div class="note-details">
+                <div class="detail">
+                    <div class="label">Нота</div>
+                    <div class="value" id="detailNote">—</div>
+                </div>
+                <div class="detail">
+                    <div class="label">Струна</div>
+                    <div class="value" id="detailString">—</div>
+                </div>
+                <div class="detail">
+                    <div class="label">Лад</div>
+                    <div class="value" id="detailFret">—</div>
+                </div>
+                <div class="detail">
+                    <div class="label">Октава</div>
+                    <div class="value" id="detailOctave">—</div>
+                </div>
+                <div class="detail">
+                    <div class="label">Изменить октаву струны</div>
+                    <select id="noteOctaveSelector">
+                        <!-- Опции будут добавлены динамически -->
+                    </select>
+                </div>
+            </div>
+            <p class="hint">Кликните по любой ноте на грифе, чтобы увидеть подробную информацию</p>
+        </div>
+        
+        <!-- Футер с контактной информацией -->
+        <div class="footer">
+            <p>Muztool - Инструменты для музыкантов</p>
+            <p>Поддержка: <a href="mailto:muztool.supp@internet.ru">muztool.supp@internet.ru</a></p>
+        </div>
+    </div>
+
+    <script>
+        // Музыкальные константы
+        const NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+        const NOTES_RU = ['До', 'До#', 'Ре', 'Ре#', 'Ми', 'Фа', 'Фа#', 'Соль', 'Соль#', 'Ля', 'Ля#', 'Си'];
+        
+        // Названия октав - ИСПРАВЛЕНО
+        const OCTAVE_NAMES = [
+            "Суб-контроктава (0)",
+            "Контроктава (1)", 
+            "Большая (2)",
+            "Малая (3)",
+            "Первая (4)",
+            "Вторая (5)",
+            "Третья (6)",
+            "Четвертая (7)",
+            "Пятая (8)"
+        ];
+        
+        // Краткая информация о гаммах для любителей
+        const SCALE_TIPS = {
+            minorPentatonic: "Самая популярная гамма для соло в роке и блюзе. Используется для импровизации, проста для запоминания.",
+            majorPentatonic: "Оптимистичная и яркая гамма, часто используется в кантри, поп-музыке и рок-н-ролле.",
+            blues: "Минорная пентатоника с добавленной блюзовой нотой (тритоном). Основа блюзовой импровизации.",
+            major: "Основная мажорная гамма, звучит радостно и позитивно. Основа большинства популярных песен.",
+            naturalMinor: "Натуральный минор - меланхоличная и эмоциональная гамма, основа минорной гармонии.",
+            harmonicMinor: "Экзотическое звучание за счет повышенной септимы. Часто используется в классике и фламенко.",
+            melodicMinor: "Универсальная гамма с разным звучанием при движении вверх и вниз.",
+            dorian: "Джазовый и фанковый лад с характерной мажорной секстой. Звучит современно и круто.",
+            phrygian: "Испанское и этническое звучание за счет малой секунды. Таинственно и драматично.",
+            mixolydian: "Блюзовый и рок-н-ролльный лад с малой септимой. Идеален для гитарных риффов.",
+            locrian: "Самый диссонансный и нестабильный лад. Используется в прогрессивном роке и метале."
+        };
+        
+        // ИСПРАВЛЕНО: Начальный строй: от 6й (толстой) к 1й (тонкой)
+        // Массив хранится как [6-я струна (толстая), 5-я, 4-я, 3-я, 2-я, 1-я (тонкая)]
+        let currentTuning = [4, 9, 2, 7, 11, 4]; // E(6), A(5), D(4), G(3), B(2), E(1) - СТАНДАРТНЫЙ СТРОЙ
+        let stringCount = 6; // Начальное количество струн
+        
+        // Конфигурация грифа
+        const CONFIG = {
+            strings: 6,
+            frets: 25,
+            stringSpacing: 42,
+            fretSpacing: 46,
+            startX: 50,
+            startY: 28
+        };
+        
+        // ИСПРАВЛЕНО: Пресеты для разного количества струн
+        // Теперь все массивы хранятся в порядке от ТОЛСТОЙ к ТОНКОЙ (6->1)
+        const TUNING_PRESETS = {
+            // 6 струн - порядок от 6й (толстой) к 1й (тонкой)
+            standard: { 
+                strings: 6, 
+                tuning: [4, 9, 2, 7, 11, 4], // E(6), A(5), D(4), G(3), B(2), E(1)
+                tuningWithOctaves: [ // Добавлены правильные октавы для стандартного строя
+                    {note: 4, octave: 2},  // E2 (6 струна)
+                    {note: 9, octave: 2},  // A2 (5 струна)
+                    {note: 2, octave: 3},  // D3 (4 струна)
+                    {note: 7, octave: 3},  // G3 (3 струна)
+                    {note: 11, octave: 3}, // B3 (2 струна)
+                    {note: 4, octave: 4}   // E4 (1 струна)
+                ],
+                name: "Standard",
+                description: "E A D G B E",
+                tonic: 4, // E
+                tonicOctave: 2, // E2
+                tonicInfo: "Тоника: E (Ми) - самая низкая нота строя"
+            },      
+            dStandard: { 
+                strings: 6, 
+                tuning: [2, 7, 0, 5, 9, 2], // D(6), G(5), C(4), F(3), A(2), D(1)
+                tuningWithOctaves: [
+                    {note: 2, octave: 2},  // D2
+                    {note: 7, octave: 2},  // G2
+                    {note: 0, octave: 3},  // C3
+                    {note: 5, octave: 3},  // F3
+                    {note: 9, octave: 3},  // A3
+                    {note: 2, octave: 4}   // D4
+                ],
+                name: "D Standard",
+                description: "D G C F A D",
+                tonic: 2, // D
+                tonicOctave: 2, // D2
+                tonicInfo: "Тоника: D (Ре) - пониженный на тон стандартный строй"
+            },      
+            dropC: { 
+                strings: 6, 
+                tuning: [0, 7, 0, 5, 9, 2], // C(6), G(5), C(4), F(3), A(2), D(1) - DROP C
+                tuningWithOctaves: [
+                    {note: 0, octave: 2},  // C2
+                    {note: 7, octave: 2},  // G2
+                    {note: 0, octave: 3},  // C3
+                    {note: 5, octave: 3},  // F3
+                    {note: 9, octave: 3},  // A3
+                    {note: 2, octave: 4}   // D4
+                ],
+                name: "Drop C",
+                description: "C G C F A D",
+                tonic: 0, // C
+                tonicOctave: 2, // C2
+                tonicInfo: "Тоника: C (До) - популярный строй для метала"
+            },          
+            
+            // 4 струны (бас) - порядок от 4й (толстой) к 1й (тонкой) - ИСПРАВЛЕНО октавы
+            bass4: { 
+                strings: 4, 
+                tuning: [4, 9, 2, 7], // E(4), A(3), D(2), G(1)
+                tuningWithOctaves: [
+                    {note: 4, octave: 1},  // E1 (4 струна, толстая) - ИСПРАВЛЕНО
+                    {note: 9, octave: 1},  // A1 (3 струна)
+                    {note: 2, octave: 2},  // D2 (2 струна)
+                    {note: 7, octave: 2}   // G2 (1 струна, тонкая) - ИСПРАВЛЕНО
+                ],
+                name: "Bass 4",
+                description: "E A D G",
+                tonic: 4, // E
+                tonicOctave: 1, // E1
+                tonicInfo: "Тоника: E (Ми) - стандартный строй 4-струнного баса"
+            },                
+            
+            // 5 струн (бас) - порядок от 5й (толстой) к 1й (тонкой) - ИСПРАВЛЕНО октавы
+            bass5: { 
+                strings: 5, 
+                tuning: [11, 4, 9, 2, 7], // B(5), E(4), A(3), D(2), G(1)
+                tuningWithOctaves: [
+                    {note: 11, octave: 0}, // B0 (5 струна, самая толстая) - ИСПРАВЛЕНО
+                    {note: 4, octave: 1},  // E1 (4 струна)
+                    {note: 9, octave: 1},  // A1 (3 струна)
+                    {note: 2, octave: 2},  // D2 (2 струна)
+                    {note: 7, octave: 2}   // G2 (1 струна, самая тонкая) - ИСПРАВЛЕНО
+                ],
+                name: "Bass 5",
+                description: "B E A D G",
+                tonic: 11, // B
+                tonicOctave: 0, // B0
+                tonicInfo: "Тоника: B (Си) - расширенный диапазон 5-струнного баса"
+            }             
+        };
+        
+        // Определения гамм (интервалы в полутонах от тоники)
+        const SCALES = {
+            // Пентатоники
+            minorPentatonic: {
+                name: "Минорная пентатоника",
+                intervals: [0, 3, 5, 7, 10],
+                description: "Тоника, малая терция, кварта, квинта, малая септима",
+                colorLegend: "Зеленый - тоника, Синий - ноты гаммы"
+            },
+            majorPentatonic: {
+                name: "Мажорная пентатоника", 
+                intervals: [0, 2, 4, 7, 9],
+                description: "Тоника, большая секунда, большая терция, квинта, большая секста",
+                colorLegend: "Зеленый - тоника, Синий - ноты гаммы"
+            },
+            blues: {
+                name: "Блюзовая гамма",
+                intervals: [0, 3, 5, 6, 7, 10],
+                description: "Минорная пентатоника + блюзовая нота (тритон)",
+                colorLegend: "Зеленый - тоника, Синий - ноты пентатоники, Розовый - блюзовая нота"
+            },
+            
+            // Основные гаммы
+            major: {
+                name: "Мажор (Ионийский)",
+                intervals: [0, 2, 4, 5, 7, 9, 11],
+                description: "Тоника, большая секунда, большая терция, кварта, квинта, большая секста, большая септима",
+                colorLegend: "Зеленый - тоника, Синий - ноты гаммы"
+            },
+            naturalMinor: {
+                name: "Натуральный минор",
+                intervals: [0, 2, 3, 5, 7, 8, 10],
+                description: "Тоника, большая секунда, малая терция, кварта, квинта, малая секста, малая септима",
+                colorLegend: "Зеленый - тоника, Синий - ноты гаммы"
+            },
+            harmonicMinor: {
+                name: "Гармонический минор", 
+                intervals: [0, 2, 3, 5, 7, 8, 11],
+                description: "Натуральный минор с повышенной септимой",
+                colorLegend: "Зеленый - тоника, Синий - ноты гаммы"
+            },
+            melodicMinor: {
+                name: "Мелодический минор",
+                intervals: [0, 2, 3, 5, 7, 9, 11],
+                description: "Натуральный минор с повышенной секстой и септимой",
+                colorLegend: "Зеленый - тоника, Синий - ноты гаммы"
+            },
+            
+            // Лады мажорной гаммы
+            dorian: {
+                name: "Дорийский лад",
+                intervals: [0, 2, 3, 5, 7, 9, 10],
+                description: "Второй лад мажорной гаммы",
+                colorLegend: "Зеленый - тоника, Синий - ноты гаммы"
+            },
+            phrygian: {
+                name: "Фригийский лад",
+                intervals: [0, 1, 3, 5, 7, 8, 10],
+                description: "Третий лад мажорной гаммы",
+                colorLegend: "Зеленый - тоника, Синий - ноты гаммы"
+            },
+            mixolydian: {
+                name: "Миксолидийский лад",
+                intervals: [0, 2, 4, 5, 7, 9, 10],
+                description: "Пятый лад мажорной гаммы",
+                colorLegend: "Зеленый - тоника, Синий - ноты гаммы"
+            },
+            locrian: {
+                name: "Локрийский лад", 
+                intervals: [0, 1, 3, 5, 6, 8, 10],
+                description: "Седьмой лад мажорной гаммы",
+                colorLegend: "Зеленый - тоника, Синий - ноты гаммы"
+            }
+        };
+        
+        // Состояния
+        let showOctaveColors = false;
+        let currentTonic = 6; // F# по умолчанию (индекс 6)
+        let currentTonicOctave = 4; // Октава тоники по умолчанию
+        let currentScale = null; // Текущая выбранная гамма
+        let markerType = 0; // 0 = круглые, 1 = вертикальные, 2 = автоматические прямоугольники
+        
+        // Хранение настроек струн с октавами
+        let currentTuningWithOctaves = [];
+        
+        // Хранение оригинальных настроек пресетов (для исправления бага)
+        let originalPresetTunings = {};
+        
+        // Для хранения информации о выбранной ноте
+        let selectedNoteData = null;
+        
+        // ИСПРАВЛЕННАЯ ФУНКЦИЯ РАСЧЕТА MIDI НОТЫ И ОКТАВЫ
+        function calculateMidiNoteAndOctave(stringIndex, fretNum) {
+            // stringIndex: 0 = верхняя (тонкая), последняя = нижняя (толстая)
+            // Нужно преобразовать в индекс массива настроек
+            const arrayIndex = stringCount - 1 - stringIndex;
+            
+            if (!currentTuningWithOctaves[arrayIndex]) {
+                // Запасной вариант
+                return { midiNote: 60, octave: 4 };
+            }
+            
+            const noteIndex = currentTuningWithOctaves[arrayIndex].note;
+            const octave = currentTuningWithOctaves[arrayIndex].octave;
+            
+            // Расчет MIDI ноты: MIDI 0 = C-1, MIDI 60 = C4
+            // Формула: MIDI = (октава + 1) * 12 + нота
+            let baseMidi = (octave + 1) * 12 + noteIndex;
+            
+            // Добавляем номер лада
+            const midiNote = baseMidi + fretNum;
+            
+            // Вычисляем октаву из MIDI
+            const calculatedOctave = Math.floor(midiNote / 12) - 1;
+            
+            return { midiNote, octave: calculatedOctave };
+        }
+        
+        // ФУНКЦИЯ ДЛЯ ПОЛУЧЕНИЯ НОТЫ С ОКТАВОЙ (C4, D5 и т.д.)
+        function getNoteWithOctave(midiNote) {
+            const noteIndex = midiNote % 12;
+            const octave = Math.floor(midiNote / 12) - 1;
+            const noteName = NOTES[noteIndex];
+            return noteName + octave;
+        }
+        
+        // ФУНКЦИЯ ДЛЯ ПОЛУЧЕНИЯ НАЗВАНИЯ ОКТАВЫ ПО НОМЕРУ
+        function getOctaveName(octaveNumber) {
+            if (octaveNumber >= 0 && octaveNumber < OCTAVE_NAMES.length) {
+                return OCTAVE_NAMES[octaveNumber];
+            }
+            return `Октава ${octaveNumber}`;
+        }
+        
+        // ФУНКЦИЯ РАСЧЕТА ОКТАВЫ ДЛЯ ОТОБРАЖЕНИЯ ЦВЕТОВ
+        function calculateOctaveForDisplay(stringIndex, fretNum) {
+            const { octave } = calculateMidiNoteAndOctave(stringIndex, fretNum);
+            // Ограничиваем диапазон для CSS классов (0-8)
+            return Math.max(0, Math.min(8, octave));
+        }
+        
+        // Показать уведомление
+        function showNotification(message, isSuccess = true) {
+            const notification = document.getElementById('notification');
+            const notificationIcon = document.getElementById('notificationIcon');
+            const notificationMessage = document.getElementById('notificationMessage');
+            
+            notificationIcon.textContent = isSuccess ? '✓' : '⚠';
+            notificationMessage.textContent = message;
+            
+            notification.classList.remove('hide');
+            notification.classList.add('show');
+            
+            // Автоматически скрыть через 3 секунды
+            setTimeout(() => {
+                notification.classList.remove('show');
+                notification.classList.add('hide');
+                setTimeout(() => {
+                    notification.classList.remove('hide');
+                }, 300);
+            }, 3000);
+        }
+        
+        // Инициализация
+        function init() {
+            // Сохраняем оригинальные настройки пресетов
+            saveOriginalPresetTunings();
+            
+            // Инициализируем настройки с октавами
+            initializeTuningWithOctaves();
+            createStringControls();
+            createFretboard();
+            createFretNumbers();
+            updateTuning();
+            
+            // Создаем кнопки тоники (простые, без подвкладок)
+            createTonicButtons();
+            
+            // Инициализируем активную кнопку тоники
+            updateTonicButtons();
+            
+            // Проверяем сохранённую тему
+            const savedTheme = localStorage.getItem('guitarTheme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-theme');
+                updateThemeButton();
+            }
+            
+            // Настройка ползунка для маркеров
+            const markerSlider = document.getElementById('markerSlider');
+            const markerLabel = document.getElementById('markerLabel');
+            
+            markerSlider.addEventListener('input', function() {
+                markerType = parseInt(this.value);
+                updateMarkerLabel();
+                createFretMarkers();
+            });
+            
+            updateMarkerLabel();
+            
+            // Добавляем обработчики для выдвижения меню при наведении на левую границу
+            setupHoverMenu();
+            
+            // На мобильных устройствах скрываем триггер меню
+            if (window.innerWidth <= 768) {
+                document.getElementById('leftEdgeTrigger').style.display = 'none';
+            }
+            
+            // Инициализация селектора октавы в информации о ноте
+            const noteOctaveSelector = document.getElementById('noteOctaveSelector');
+            noteOctaveSelector.addEventListener('change', function() {
+                if (selectedNoteData) {
+                    const newOctave = parseInt(this.value);
+                    const arrayIndex = stringCount - 1 - selectedNoteData.stringIndex;
+                    
+                    if (currentTuningWithOctaves[arrayIndex]) {
+                        currentTuningWithOctaves[arrayIndex].octave = newOctave;
+                        
+                        // Обновляем отображение
+                        updateTuning();
+                        
+                        // Показываем уведомление
+                        showNotification('Октава струны изменена');
+                    }
+                }
+            });
+        }
+        
+        // Создание кнопок тоники (простые)
+        function createTonicButtons() {
+            const tonicSelector = document.getElementById('tonicSelector');
+            tonicSelector.innerHTML = '';
+            
+            for (let i = 0; i < NOTES.length; i++) {
+                const tonicBtn = document.createElement('button');
+                tonicBtn.className = 'tonic-btn';
+                tonicBtn.textContent = NOTES[i];
+                tonicBtn.dataset.noteIndex = i;
+                
+                tonicBtn.addEventListener('click', function() {
+                    setTonic(i, 4); // Октава по умолчанию 4
+                });
+                
+                tonicSelector.appendChild(tonicBtn);
+            }
+        }
+        
+        // Сохранить оригинальные настройки пресетов
+        function saveOriginalPresetTunings() {
+            for (const presetName in TUNING_PRESETS) {
+                if (TUNING_PRESETS[presetName].tuningWithOctaves) {
+                    originalPresetTunings[presetName] = {
+                        strings: TUNING_PRESETS[presetName].strings,
+                        tuningWithOctaves: JSON.parse(JSON.stringify(TUNING_PRESETS[presetName].tuningWithOctaves))
+                    };
+                }
+            }
+        }
+        
+        // Восстановить оригинальные настройки пресета
+        function restoreOriginalPresetTuning(presetName) {
+            if (originalPresetTunings[presetName]) {
+                TUNING_PRESETS[presetName].tuningWithOctaves = 
+                    JSON.parse(JSON.stringify(originalPresetTunings[presetName].tuningWithOctaves));
+            }
+        }
+        
+        // Инициализация настроек с октавами
+        function initializeTuningWithOctaves() {
+            currentTuningWithOctaves = [];
+            for (let i = 0; i < stringCount; i++) {
+                // Определяем октаву в зависимости от позиции струны
+                let octave;
+                if (stringCount === 4) { // Бас 4-струнный
+                    octave = [1, 1, 2, 2][i];
+                } else if (stringCount === 5) { // Бас 5-струнный
+                    octave = [0, 1, 1, 2, 2][i];
+                } else if (stringCount === 6) { // Стандартная гитара
+                    octave = [2, 2, 3, 3, 3, 4][i];
+                } else if (stringCount === 7) { // 7-струнная
+                    octave = [1, 2, 2, 3, 3, 3, 4][i];
+                } else if (stringCount === 8) { // 8-струнная
+                    octave = [1, 1, 2, 2, 3, 3, 3, 4][i];
+                } else {
+                    octave = 3; // По умолчанию
+                }
+                
+                currentTuningWithOctaves[i] = {
+                    note: currentTuning[i],
+                    octave: octave
+                };
+            }
+        }
+        
+        // Обновление текста метки для ползунка маркеров - ИСПРАВЛЕНО
+        function updateMarkerLabel() {
+            const markerLabel = document.getElementById('markerLabel');
+            const labels = ['Круглые', 'Вертикальные', 'Авто'];
+            markerLabel.textContent = labels[markerType];
+        }
+        
+        // Настройка выдвижения меню при наведении на левую границу
+        function setupHoverMenu() {
+            const leftEdgeTrigger = document.getElementById('leftEdgeTrigger');
+            const menu = document.getElementById('slideMenu');
+            const overlay = document.getElementById('menuOverlay');
+            
+            leftEdgeTrigger.addEventListener('mouseenter', () => {
+                // Только на десктопе (ширина экрана > 768px)
+                if (window.innerWidth > 768) {
+                    menu.classList.add('open');
+                    overlay.classList.add('show');
+                }
+            });
+            
+            menu.addEventListener('mouseleave', (e) => {
+                // Если мышь покидает меню, то закрываем его
+                if (window.innerWidth > 768) {
+                    menu.classList.remove('open');
+                    overlay.classList.remove('show');
+                }
+            });
+            
+            // Обработчик изменения размера окна
+            window.addEventListener('resize', function() {
+                if (window.innerWidth <= 768) {
+                    leftEdgeTrigger.style.display = 'none';
+                } else {
+                    leftEdgeTrigger.style.display = 'block';
+                }
+            });
+        }
+        
+        // Создание контролов для струн с раздельным выбором ноты и октавы
+        function createStringControls() {
+            const controlsContainer = document.getElementById('stringControls');
+            controlsContainer.innerHTML = '';
+            
+            // ВНИМАНИЕ: В интерфейсе струны показываются от 1 (верхняя, тонкая) до N (нижняя, толстая)
+            // Но в массиве они хранятся в обратном порядке (толстая -> тонкая)
+            for (let stringNum = 1; stringNum <= stringCount; stringNum++) {
+                const tuningGroup = document.createElement('div');
+                tuningGroup.className = 'tuning-group';
+                tuningGroup.id = `string-group-${stringNum}`;
+                
+                // Индекс в массиве для этой струны (индекс 0 = толстая струна, последний индекс = тонкая)
+                const arrayIndex = stringCount - stringNum;
+                
+                const label = document.createElement('label');
+                label.textContent = `Струна ${stringNum}`;
+                
+                // Контейнер для выбора ноты
+                const tuningSelectContainer = document.createElement('div');
+                tuningSelectContainer.className = 'tuning-select-container';
+                
+                // Селектор ноты
+                const noteSelect = document.createElement('select');
+                noteSelect.className = 'tuning-select';
+                noteSelect.id = `string-note-${stringNum}`;
+                
+                // Заполняем опции: 12 нот
+                for (let noteIndex = 0; noteIndex < NOTES.length; noteIndex++) {
+                    const option = document.createElement('option');
+                    option.value = noteIndex;
+                    option.textContent = `${NOTES[noteIndex]} (${NOTES_RU[noteIndex]})`;
+                    
+                    // Устанавливаем значение, если оно соответствует текущей настройке
+                    if (currentTuningWithOctaves[arrayIndex] && 
+                        currentTuningWithOctaves[arrayIndex].note === noteIndex) {
+                        option.selected = true;
+                    }
+                    
+                    noteSelect.appendChild(option);
+                }
+                
+                // Обработчики событий
+                noteSelect.addEventListener('change', function() {
+                    const noteIndex = parseInt(this.value);
+                    const arrayIndex = stringCount - stringNum;
+                    
+                    currentTuningWithOctaves[arrayIndex].note = noteIndex;
+                    
+                    updateTuningFromOctaves();
+                });
+                
+                tuningSelectContainer.appendChild(noteSelect);
+                tuningGroup.appendChild(label);
+                tuningGroup.appendChild(tuningSelectContainer);
+                controlsContainer.appendChild(tuningGroup);
+            }
+            
+            // Обновляем отображение количества струн
+            document.getElementById('stringCountDisplay').textContent = stringCount;
+        }
+        
+        // Обновление строя из настроек с октавами
+        function updateTuningFromOctaves() {
+            // Обновляем currentTuning из currentTuningWithOctaves
+            currentTuning = currentTuningWithOctaves.map(item => item.note);
+            updateTuning();
+            
+            // Автоматически определяем тонику из строя
+            autoDetectTonic();
+        }
+        
+        // Автоматическое определение тоники из текущего строя
+        function autoDetectTonic() {
+            if (currentTuningWithOctaves.length === 0) return;
+            
+            // Берем самую низкую ноту (толстую струну) как тонику
+            const lowestString = currentTuningWithOctaves[0];
+            setTonic(lowestString.note, lowestString.octave);
+        }
+        
+        // Получение стандартной ноты для струны в зависимости от количества струн
+        function getDefaultNoteForString(stringNum, totalStrings) {
+            const arrayIndex = totalStrings - stringNum;
+            
+            if (totalStrings === 6) {
+                const standard6 = [4, 9, 2, 7, 11, 4]; // E(6), A(5), D(4), G(3), B(2), E(1)
+                return standard6[arrayIndex];
+            } else if (totalStrings === 5) {
+                const standard5 = [11, 4, 9, 2, 7]; // B(5), E(4), A(3), D(2), G(1)
+                return standard5[arrayIndex];
+            } else if (totalStrings === 4) {
+                const standard4 = [4, 9, 2, 7]; // E(4), A(3), D(2), G(1)
+                return standard4[arrayIndex];
+            } else if (totalStrings === 7) {
+                const standard7 = [4, 9, 2, 7, 11, 4, 11]; // E(7), A(6), D(5), G(4), B(3), E(2), B(1)
+                return standard7[arrayIndex];
+            } else if (totalStrings === 8) {
+                const standard8 = [4, 9, 2, 7, 11, 4, 11, 6]; // E(8), A(7), D(6), G(5), B(4), E(3), B(2), F#(1)
+                return standard8[arrayIndex];
+            } else {
+                return (stringNum * 7) % 12;
+            }
+        }
+        
+        // Получение стандартной октавы для струны
+        function getDefaultOctaveForString(stringNum, totalStrings) {
+            const arrayIndex = totalStrings - stringNum;
+            
+            if (totalStrings === 4) { // Бас 4-струнный
+                return [1, 1, 2, 2][arrayIndex];
+            } else if (totalStrings === 5) { // Бас 5-струнный
+                return [0, 1, 1, 2, 2][arrayIndex];
+            } else if (totalStrings === 6) { // Стандартная гитара
+                return [2, 2, 3, 3, 3, 4][arrayIndex];
+            } else if (totalStrings === 7) { // 7-струнная
+                return [1, 2, 2, 3, 3, 3, 4][arrayIndex];
+            } else if (totalStrings === 8) { // 8-струнная
+                return [1, 1, 2, 2, 3, 3, 3, 4][arrayIndex];
+            } else {
+                return 3; // По умолчанию
+            }
+        }
+        
+        // Изменение количества струн С УЧЕТОМ ГДЕ ДОБАВЛЯЕТСЯ СТРУНА
+        function changeStringCount(delta) {
+            const newCount = stringCount + delta;
+            
+            // Ограничиваем от 4 до 8 струн
+            if (newCount < 4 || newCount > 8) return;
+            
+            // Сохраняем текущие настройки
+            const oldTuningWithOctaves = [...currentTuningWithOctaves];
+            
+            stringCount = newCount;
+            CONFIG.strings = stringCount;
+            
+            // Создаем новый массив настроек
+            const newTuningWithOctaves = [];
+            
+            if (delta > 0) {
+                // Добавляем струну (НИЖНЮЮ/ТОЛСТУЮ)
+                // Добавляем в начало массива (толстая струна)
+                const newString = calculateNewStringWithOctave(oldTuningWithOctaves, 'bottom', newCount);
+                newTuningWithOctaves[0] = newString;
+                
+                // Копируем старые настройки
+                for (let i = 0; i < oldTuningWithOctaves.length; i++) {
+                    newTuningWithOctaves[i + 1] = oldTuningWithOctaves[i];
+                }
+            } else {
+                // Удаляем струну (НИЖНЮЮ/ТОЛСТУЮ)
+                // Удаляем из начала массива (толстая струна)
+                for (let i = 1; i < oldTuningWithOctaves.length; i++) {
+                    newTuningWithOctaves[i - 1] = oldTuningWithOctaves[i];
+                }
+            }
+            
+            currentTuningWithOctaves = newTuningWithOctaves;
+            
+            // Обновляем currentTuning
+            currentTuning = currentTuningWithOctaves.map(item => item.note);
+            
+            // Пересоздаем контролы
+            createStringControls();
+            
+            // Обновляем гриф
+            updateTuning();
+            
+            // Автоматически определяем тонику
+            autoDetectTonic();
+        }
+        
+        // Расчет ноты и октавы для новой струны
+        function calculateNewStringWithOctave(oldTuningWithOctaves, position, newCount) {
+            if (oldTuningWithOctaves.length === 0) {
+                return {
+                    note: getDefaultNoteForString(newCount, newCount),
+                    octave: getDefaultOctaveForString(newCount, newCount)
+                };
+            }
+            
+            if (position === 'bottom') {
+                // Добавляем толстую струну (внизу)
+                // Новая струна должна быть на кварту (5 полутонов) ниже самой толстой струны
+                const thickestString = oldTuningWithOctaves[0];
+                let newNote = (thickestString.note - 5 + 12) % 12;
+                
+                // Определяем октаву
+                let newOctave = thickestString.octave;
+                if (thickestString.note < 5) { // Если при вычитании перешли через границу октавы
+                    newOctave = thickestString.octave - 1;
+                }
+                
+                return { note: newNote, octave: newOctave };
+            } else {
+                // Добавляем тонкую струну (вверху)
+                // Новая струна должна быть на кварту (5 полутонов) выше самой тонкой струны
+                const thinnestString = oldTuningWithOctaves[oldTuningWithOctaves.length - 1];
+                let newNote = (thinnestString.note + 5) % 12;
+                
+                // Определяем октаву
+                let newOctave = thinnestString.octave;
+                if (thinnestString.note > 6) { // Если при сложении перешли через границу октавы
+                    newOctave = thinnestString.octave + 1;
+                }
+                
+                return { note: newNote, octave: newOctave };
+            }
+        }
+        
+        // Создание грифа
+        function createFretboard() {
+            const fretboard = document.getElementById('fretboard');
+            fretboard.innerHTML = '';
+            
+            // Порожек
+            const nut = document.createElement('div');
+            nut.className = 'nut';
+            fretboard.appendChild(nut);
+            
+            // Ладовые порожки
+            for (let fret = 1; fret <= 24; fret++) {
+                const fretWire = document.createElement('div');
+                fretWire.className = 'fret-wire';
+                fretWire.style.left = `${CONFIG.startX + (fret * CONFIG.fretSpacing) - 1}px`;
+                fretboard.appendChild(fretWire);
+            }
+        }
+        
+        // Создание струн на грифе
+        function createStrings() {
+            const fretboard = document.getElementById('fretboard');
+            
+            // Удаляем старые струны
+            document.querySelectorAll('.string').forEach(el => el.remove());
+            
+            // Струны (1 вверху, последняя внизу)
+            for (let i = 0; i < CONFIG.strings; i++) {
+                const stringEl = document.createElement('div');
+                stringEl.className = 'string';
+                stringEl.style.top = `${CONFIG.startY + (i * CONFIG.stringSpacing)}px`;
+                fretboard.appendChild(stringEl);
+            }
+        }
+        
+        // Создание маркеров ладов с правильным позиционированием - ИСПРАВЛЕНО
+        function createFretMarkers() {
+            const fretboard = document.getElementById('fretboard');
+            
+            // Удаляем старые маркеры
+            document.querySelectorAll('.fret-marker').forEach(el => el.remove());
+            
+            // Вычисляем текущую высоту грифа
+            const fretboardHeight = parseFloat(fretboard.style.height) || 260;
+            
+            // Вычисляем вертикальный центр грифа (для одинарных маркеров)
+            const centerY = fretboardHeight / 2;
+            
+            // Для двойных маркеров позиции на 1/3 и 2/3 высоты
+            const doubleY1 = fretboardHeight / 3;
+            const doubleY2 = fretboardHeight * 2 / 3;
+            
+            // Высота для вертикальных прямоугольников
+            const verticalMarkerHeight = fretboardHeight * 0.6;
+            
+            // Позиции ладов для маркеров
+            const markerPositions = [
+                { fret: 3, type: 'single' },
+                { fret: 5, type: 'single' },
+                { fret: 7, type: 'single' },
+                { fret: 9, type: 'single' },
+                { fret: 12, type: 'double' },
+                { fret: 15, type: 'single' },
+                { fret: 17, type: 'single' },
+                { fret: 19, type: 'single' },
+                { fret: 21, type: 'single' },
+                { fret: 24, type: 'double' }
+            ];
+            
+            // Определяем тип маркеров в зависимости от настройки ползунка - ИСПРАВЛЕНО
+            let useVerticalMarkers = false;
+            
+            if (markerType === 2) {
+                // АВТО-РЕЖИМ: нечетное количество струн = вертикальные, четное = круглые
+                useVerticalMarkers = (stringCount % 2 !== 0);
+            } else if (markerType === 1) {
+                // Вертикальные маркеры
+                useVerticalMarkers = true;
+            }
+            // markerType === 0: круглые маркеры (по умолчанию)
+            
+            markerPositions.forEach(marker => {
+                if (marker.type === 'double') {
+                    if (useVerticalMarkers) {
+                        // Вертикальные маркеры для двойных позиций
+                        const markerEl = document.createElement('div');
+                        markerEl.className = 'fret-marker vertical';
+                        markerEl.style.left = `${CONFIG.startX + (marker.fret * CONFIG.fretSpacing) - (CONFIG.fretSpacing / 2) - 4}px`;
+                        markerEl.style.top = `${centerY - (verticalMarkerHeight / 2)}px`;
+                        markerEl.style.height = `${verticalMarkerHeight}px`;
+                        fretboard.appendChild(markerEl);
+                    } else {
+                        // Стандартные круглые маркеры (две точки)
+                        const markerEl1 = document.createElement('div');
+                        markerEl1.className = 'fret-marker';
+                        markerEl1.style.left = `${CONFIG.startX + (marker.fret * CONFIG.fretSpacing) - (CONFIG.fretSpacing / 2) - 9}px`;
+                        markerEl1.style.top = `${doubleY1 - 9}px`;
+                        fretboard.appendChild(markerEl1);
+                        
+                        const markerEl2 = document.createElement('div');
+                        markerEl2.className = 'fret-marker';
+                        markerEl2.style.left = `${CONFIG.startX + (marker.fret * CONFIG.fretSpacing) - (CONFIG.fretSpacing / 2) - 9}px`;
+                        markerEl2.style.top = `${doubleY2 - 9}px`;
+                        fretboard.appendChild(markerEl2);
+                    }
+                } else {
+                    // Одинарные маркеры
+                    if (useVerticalMarkers) {
+                        const markerEl = document.createElement('div');
+                        markerEl.className = 'fret-marker vertical';
+                        markerEl.style.left = `${CONFIG.startX + (marker.fret * CONFIG.fretSpacing) - (CONFIG.fretSpacing / 2) - 4}px`;
+                        markerEl.style.top = `${centerY - (verticalMarkerHeight / 2)}px`;
+                        markerEl.style.height = `${verticalMarkerHeight}px`;
+                        fretboard.appendChild(markerEl);
+                    } else {
+                        const markerEl = document.createElement('div');
+                        markerEl.className = 'fret-marker';
+                        markerEl.style.left = `${CONFIG.startX + (marker.fret * CONFIG.fretSpacing) - (CONFIG.fretSpacing / 2) - 9}px`;
+                        markerEl.style.top = `${centerY - 9}px`;
+                        fretboard.appendChild(markerEl);
+                    }
+                }
+            });
+        }
+        
+        // Номера ладов
+        function createFretNumbers() {
+            const container = document.getElementById('fretNumbers');
+            container.innerHTML = '';
+            
+            for (let fret = 0; fret < CONFIG.frets; fret++) {
+                const number = document.createElement('div');
+                number.className = 'fret-number';
+                number.textContent = fret;
+                
+                if (fret === 3 || fret === 5 || fret === 7 || fret === 9 || 
+                    fret === 12 || fret === 15 || fret === 17 || 
+                    fret === 19 || fret === 21 || fret === 24) {
+                    number.classList.add('special');
+                }
+                
+                container.appendChild(number);
+            }
+        }
+        
+        // Обновление нот на грифе
+        function updateTuning() {
+            // Удаляем старые ноты
+            document.querySelectorAll('.note, .open-note').forEach(el => el.remove());
+            
+            const fretboard = document.getElementById('fretboard');
+            
+            // Создаем струны
+            createStrings();
+            
+            // Рассчитываем новую высоту грифа на основе количества струн
+            const minHeight = 180;
+            const maxHeight = 360;
+            const baseHeight = 260;
+            const heightStep = (maxHeight - minHeight) / 4; // от 4 до 8 струн
+            
+            // Рассчитываем высоту: для 6 струн - 260px, для 4 - 180px, для 8 - 360px
+            let newHeight;
+            if (stringCount === 6) {
+                newHeight = baseHeight;
+            } else if (stringCount < 6) {
+                newHeight = minHeight + (stringCount - 4) * heightStep;
+            } else {
+                newHeight = baseHeight + (stringCount - 6) * heightStep;
+            }
+            
+            // Устанавливаем новую высоту
+            fretboard.style.height = `${newHeight}px`;
+            
+            // Рассчитываем новое расстояние между струнами
+            const stringSpacing = (newHeight - 56) / (stringCount - 1); // 56 = 28*2 (отступы сверху и снизу)
+            
+            // Создаем ноты на грифе (1 струна вверху, последняя внизу)
+            for (let displayStringIndex = 0; displayStringIndex < CONFIG.strings; displayStringIndex++) {
+                // displayStringIndex: 0 = верхняя (тонкая), последняя = нижняя (толстая)
+                // Индекс в массиве настроек (0 = толстая, последний = тонкая)
+                const arrayIndex = stringCount - 1 - displayStringIndex;
+                
+                if (!currentTuningWithOctaves[arrayIndex]) continue;
+                
+                const noteIndex = currentTuningWithOctaves[arrayIndex].note;
+                const octave = currentTuningWithOctaves[arrayIndex].octave;
+                const note = NOTES[noteIndex];
+                
+                // Открытая нота (слева от порожка)
+                const openNoteEl = document.createElement('div');
+                openNoteEl.className = 'open-note';
+                openNoteEl.textContent = note;
+                
+                const y = CONFIG.startY + (displayStringIndex * stringSpacing) - 15;
+                openNoteEl.style.top = `${y}px`;
+                
+                // Данные
+                openNoteEl.dataset.string = displayStringIndex;
+                openNoteEl.dataset.stringNumber = displayStringIndex + 1;
+                openNoteEl.dataset.fret = 0;
+                openNoteEl.dataset.note = note;
+                openNoteEl.dataset.noteIndex = noteIndex;
+                openNoteEl.dataset.octave = octave;
+                
+                openNoteEl.addEventListener('click', function() {
+                    showNoteInfo(this);
+                });
+                
+                fretboard.appendChild(openNoteEl);
+                
+                // Ноты на ладах
+                for (let fret = 1; fret < CONFIG.frets; fret++) {
+                    const currentNoteIndex = (currentTuningWithOctaves[arrayIndex].note + fret) % 12;
+                    const currentNote = NOTES[currentNoteIndex];
+                    
+                    if (fret > 24) continue;
+                    
+                    const noteEl = document.createElement('div');
+                    noteEl.className = 'note';
+                    noteEl.textContent = currentNote;
+                    
+                    const x = CONFIG.startX + (fret * CONFIG.fretSpacing) - (CONFIG.fretSpacing / 2) - 15;
+                    const y = CONFIG.startY + (displayStringIndex * stringSpacing) - 15;
+                    
+                    noteEl.style.left = `${x}px`;
+                    noteEl.style.top = `${y}px`;
+                    
+                    noteEl.dataset.string = displayStringIndex;
+                    noteEl.dataset.stringNumber = displayStringIndex + 1;
+                    noteEl.dataset.fret = fret;
+                    noteEl.dataset.note = currentNote;
+                    noteEl.dataset.noteIndex = currentNoteIndex;
+                    
+                    noteEl.addEventListener('click', function() {
+                        showNoteInfo(this);
+                    });
+                    
+                    fretboard.appendChild(noteEl);
+                }
+            }
+            
+            // Создаем маркеры ладов с правильным позиционированием
+            createFretMarkers();
+            
+            // Обновляем все подсветки
+            updateOctaveColors();
+            updateScaleDisplay();
+        }
+        
+        // Установка пресета - ИСПРАВЛЕНО
+        function setPreset(presetName) {
+            const preset = TUNING_PRESETS[presetName];
+            if (!preset) return;
+            
+            // Восстанавливаем оригинальные настройки пресета
+            restoreOriginalPresetTuning(presetName);
+            
+            document.querySelectorAll('.action-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Меняем количество струн, если нужно
+            if (preset.strings !== stringCount) {
+                stringCount = preset.strings;
+                CONFIG.strings = stringCount;
+                
+                // Используем настройки с октавами, если они есть
+                if (preset.tuningWithOctaves) {
+                    currentTuningWithOctaves = JSON.parse(JSON.stringify(preset.tuningWithOctaves));
+                    currentTuning = currentTuningWithOctaves.map(item => item.note);
+                } else {
+                    currentTuning = [...preset.tuning];
+                    // Инициализируем октавы
+                    initializeTuningWithOctaves();
+                }
+                
+                createStringControls();
+            } else {
+                // Устанавливаем значения для текущего количества струн
+                if (preset.tuningWithOctaves) {
+                    currentTuningWithOctaves = JSON.parse(JSON.stringify(preset.tuningWithOctaves));
+                    currentTuning = currentTuningWithOctaves.map(item => item.note);
+                } else {
+                    currentTuning = [...preset.tuning];
+                    // Инициализируем октавы
+                    initializeTuningWithOctaves();
+                }
+                
+                // Обновляем значения в контролах
+                for (let stringNum = 1; stringNum <= stringCount; stringNum++) {
+                    const arrayIndex = stringCount - stringNum;
+                    const noteSelect = document.getElementById(`string-note-${stringNum}`);
+                    
+                    if (noteSelect && currentTuningWithOctaves[arrayIndex]) {
+                        noteSelect.value = currentTuningWithOctaves[arrayIndex].note;
+                    }
+                }
+            }
+            
+            // Устанавливаем тонику из пресета
+            if (preset.tonic !== undefined) {
+                setTonic(preset.tonic, preset.tonicOctave || 4);
+            } else {
+                // Автоматически определяем тонику
+                autoDetectTonic();
+            }
+            
+            updateTuning();
+        }
+        
+        // Обновление цветов октав
+        function updateOctaveColors() {
+            // Удаляем все классы октав
+            document.querySelectorAll('.note, .open-note').forEach(note => {
+                for (let i = 0; i <= 8; i++) {
+                    note.classList.remove(`octave-${i}`);
+                }
+            });
+            
+            if (!showOctaveColors) return;
+            
+            // Добавляем классы октав для каждой ноты
+            document.querySelectorAll('.note, .open-note').forEach(note => {
+                const stringIndex = parseInt(note.dataset.string);
+                const fretNum = parseInt(note.dataset.fret);
+                const octave = calculateOctaveForDisplay(stringIndex, fretNum);
+                
+                // Добавляем класс октавы
+                note.classList.add(`octave-${octave}`);
+            });
+        }
+        
+        // Переключение подсветки октав
+        function toggleOctaveColors() {
+            showOctaveColors = !showOctaveColors;
+            const toggleBtn = document.getElementById('octaveBtn');
+            
+            if (showOctaveColors) {
+                toggleBtn.classList.add('active');
+                toggleBtn.textContent = 'Скрыть октавы';
+                // Выключаем все гаммы
+                currentScale = null;
+                document.querySelectorAll('.menu-btn.scale').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                updateScaleInfo();
+            } else {
+                toggleBtn.classList.remove('active');
+                toggleBtn.textContent = 'Показать октавы';
+            }
+            
+            updateOctaveColors();
+            updateScaleDisplay();
+        }
+        
+        // Изменение всего строя на полтона - ИСПРАВЛЕНО
+        function tuneAll(delta) {
+            // Изменяем все ноты в строе на delta полутонов с корректным изменением октавы
+            for (let i = 0; i < currentTuningWithOctaves.length; i++) {
+                let newNote = currentTuningWithOctaves[i].note + delta;
+                let newOctave = currentTuningWithOctaves[i].octave;
+                
+                // Корректируем октаву при переходе через границу нот
+                while (newNote < 0) {
+                    newNote += 12;
+                    newOctave -= 1;
+                }
+                while (newNote >= 12) {
+                    newNote -= 12;
+                    newOctave += 1;
+                }
+                
+                // Ограничиваем октаву разумными пределами
+                if (newOctave < -1) newOctave = -1;
+                if (newOctave > 9) newOctave = 9;
+                
+                currentTuningWithOctaves[i].note = newNote;
+                currentTuningWithOctaves[i].octave = newOctave;
+            }
+            
+            // Обновляем значения в контролах
+            for (let stringNum = 1; stringNum <= stringCount; stringNum++) {
+                const arrayIndex = stringCount - stringNum;
+                const noteSelect = document.getElementById(`string-note-${stringNum}`);
+                
+                if (noteSelect && currentTuningWithOctaves[arrayIndex]) {
+                    noteSelect.value = currentTuningWithOctaves[arrayIndex].note;
+                }
+            }
+            
+            // Автоматически определяем тонику
+            autoDetectTonic();
+            
+            // Обновляем гриф
+            updateTuning();
+        }
+        
+        // Установка гаммы
+        function setScale(scaleName) {
+            // Выключаем октавы при выборе гаммы
+            if (showOctaveColors) {
+                showOctaveColors = false;
+                document.getElementById('octaveBtn').classList.remove('active');
+                document.getElementById('octaveBtn').textContent = 'Показать октавы';
+                updateOctaveColors();
+            }
+            
+            // Если нажали на ту же гамму - выключаем её
+            if (currentScale === scaleName) {
+                currentScale = null;
+                document.getElementById(scaleName + 'Btn').classList.remove('active');
+            } else {
+                currentScale = scaleName;
+                
+                // Сбрасываем все кнопки гамм
+                document.querySelectorAll('.menu-btn.scale').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                
+                // Активируем текущую
+                document.getElementById(scaleName + 'Btn').classList.add('active');
+            }
+            
+            updateScaleDisplay();
+            updateScaleInfo();
+        }
+        
+        // Обновление отображения гаммы
+        function updateScaleDisplay() {
+            // Удаляем все классы гамм
+            document.querySelectorAll('.note, .open-note').forEach(note => {
+                note.classList.remove('scale-tonic', 'scale-note', 'scale-blues');
+            });
+            
+            if (!currentScale) return;
+            
+            const scale = SCALES[currentScale];
+            if (!scale) return;
+            
+            // Для каждой ноты на грифе проверяем, входит ли она в гамму
+            document.querySelectorAll('.note, .open-note').forEach(note => {
+                const noteIndex = parseInt(note.dataset.noteIndex);
+                
+                // Вычисляем разницу от текущей тоники
+                let diff = (noteIndex - currentTonic + 12) % 12;
+                
+                if (scale.intervals.includes(diff)) {
+                    if (diff === 0) {
+                        // Это тоника
+                        note.classList.add('scale-tonic');
+                    } else if (currentScale === 'blues' && diff === 6) {
+                        // Для блюзовой гаммы - блюзовая нота отдельным цветом
+                        note.classList.add('scale-blues');
+                    } else {
+                        // Это другая нота гаммы
+                        note.classList.add('scale-note');
+                    }
+                }
+            });
+        }
+        
+        // Обновление информации о гамме - ИСПРАВЛЕНО
+        function updateScaleInfo() {
+            const infoElement = document.getElementById('scaleInfo');
+            
+            if (!currentScale) {
+                infoElement.innerHTML = 'Выберите тонику и гамму для отображения';
+                return;
+            }
+            
+            const scale = SCALES[currentScale];
+            const tonicName = NOTES[currentTonic] + currentTonicOctave + ' (' + NOTES_RU[currentTonic] + ')';
+            const scaleTip = SCALE_TIPS[currentScale] || '';
+            
+            let colorLegendHTML = '';
+            if (scale.colorLegend) {
+                colorLegendHTML = `
+                    <div class="color-legend">
+                        <div class="color-item">
+                            <div class="color-dot tonic"></div>
+                            <div class="color-text">Зеленый - тоника гаммы (${NOTES[currentTonic]})</div>
+                        </div>
+                        <div class="color-item">
+                            <div class="color-dot note"></div>
+                            <div class="color-text">Синий - ноты гаммы</div>
+                        </div>
+                `;
+                
+                if (currentScale === 'blues') {
+                    colorLegendHTML += `
+                        <div class="color-item">
+                            <div class="color-dot blues"></div>
+                            <div class="color-text">Розовый - блюзовая нота (тритон)</div>
+                        </div>
+                    `;
+                }
+                
+                colorLegendHTML += `</div>`;
+            }
+            
+            infoElement.innerHTML = `
+                <strong>${tonicName} ${scale.name}</strong><br>
+                ${scale.description}<br>
+                Интервалы от тоники: ${scale.intervals.map(i => i + 'п').join(', ')}
+                ${colorLegendHTML}
+                <div class="app-info">
+                    ${scaleTip}
+                </div>
+            `;
+        }
+        
+        // Установка тоники для гаммы с октавой
+        function setTonic(tonicIndex, octave = 4) {
+            currentTonic = tonicIndex;
+            currentTonicOctave = octave;
+            updateTonicButtons();
+            
+            if (currentScale) {
+                updateScaleDisplay();
+                updateScaleInfo();
+            }
+        }
+        
+        // Обновление кнопок выбора тоники
+        function updateTonicButtons() {
+            const allTonicBtns = document.querySelectorAll('.tonic-btn');
+            allTonicBtns.forEach(btn => {
+                btn.classList.remove('active');
+                const noteIndex = parseInt(btn.dataset.noteIndex);
+                
+                // Если это текущая тоника, активируем кнопку
+                if (noteIndex === currentTonic) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+        
+        // Переключение темы
+        function toggleTheme() {
+            document.body.classList.toggle('dark-theme');
+            const isDark = document.body.classList.contains('dark-theme');
+            localStorage.setItem('guitarTheme', isDark ? 'dark' : 'light');
+            updateThemeButton();
+        }
+        
+        // Обновление кнопки темы
+        function updateThemeButton() {
+            const themeToggle = document.getElementById('themeToggle');
+            const themeIcon = themeToggle.querySelector('.theme-icon');
+            const isDark = document.body.classList.contains('dark-theme');
+            
+            themeToggle.querySelector('span:first-child').textContent = 
+                isDark ? 'Светлая тема' : 'Тёмная тема';
+            themeIcon.textContent = isDark ? '☀️' : '🌙';
+        }
+        
+        // Показ информации о ноте
+        function showNoteInfo(noteElement) {
+            document.querySelectorAll('.note, .open-note').forEach(n => n.classList.remove('highlight'));
+            noteElement.classList.add('highlight');
+            
+            const stringIndex = parseInt(noteElement.dataset.string);
+            const stringNum = parseInt(noteElement.dataset.stringNumber);
+            const fretNum = parseInt(noteElement.dataset.fret);
+            const note = noteElement.dataset.note;
+            const noteIndex = parseInt(noteElement.dataset.noteIndex);
+            const noteRu = NOTES_RU[noteIndex];
+            
+            // Сохраняем данные о выбранной ноте
+            selectedNoteData = {
+                stringIndex: stringIndex,
+                stringNum: stringNum,
+                fretNum: fretNum
+            };
+            
+            // Расчет MIDI ноты и октавы
+            const { midiNote, octave } = calculateMidiNoteAndOctave(stringIndex, fretNum);
+            
+            // Получаем ноту с октавой (например, C4, D5 и т.д.)
+            const noteWithOctave = getNoteWithOctave(midiNote);
+            
+            // Получаем название октавы
+            const octaveName = getOctaveName(octave);
+            
+            // Обновляем информацию
+            document.getElementById('detailNote').textContent = `${note} (${noteRu})`;
+            document.getElementById('detailString').textContent = `${stringNum} струна`;
+            document.getElementById('detailFret').textContent = fretNum === 0 ? 'Открытая' : `${fretNum} лад`;
+            // ИСПРАВЛЕНО: отображаем октаву с музыкальным обозначением и названием
+            document.getElementById('detailOctave').textContent = `${octaveName} (${noteWithOctave})`;
+            
+            document.getElementById('noteTitle').textContent = `${noteRu} (${note}) — Струна ${stringNum}, Лад ${fretNum}`;
+            
+            // Обновляем селектор октавы
+            const noteOctaveSelector = document.getElementById('noteOctaveSelector');
+            noteOctaveSelector.innerHTML = '';
+            
+            // Получаем октаву струны
+            const arrayIndex = stringCount - 1 - stringIndex;
+            const stringOctave = currentTuningWithOctaves[arrayIndex] ? currentTuningWithOctaves[arrayIndex].octave : 3;
+            
+            // Заполняем опции октав
+            for (let oct = -1; oct <= 9; oct++) {
+                const option = document.createElement('option');
+                option.value = oct;
+                option.textContent = `Октава ${oct}`;
+                if (oct === stringOctave) {
+                    option.selected = true;
+                }
+                noteOctaveSelector.appendChild(option);
+            }
+            
+            document.getElementById('noteInfo').classList.add('active');
+        }
+        
+        // Копирование пресета в буфер обмена
+        function copyPreset() {
+            // Формируем текстовое представление пресета
+            let presetText = `Струн: ${stringCount}\n`;
+            presetText += `Строй:\n`;
+            
+            // Перебираем струны от толстой к тонкой (как в интерфейсе)
+            for (let i = stringCount - 1; i >= 0; i--) {
+                const stringNum = stringCount - i;
+                const noteIndex = currentTuningWithOctaves[i].note;
+                const octave = currentTuningWithOctaves[i].octave;
+                const noteName = NOTES[noteIndex];
+                const octaveName = getOctaveName(octave);
+                
+                presetText += `  Струна ${stringNum}: ${noteName} (${NOTES_RU[noteIndex]}) - ${octaveName} (${noteName}${octave})\n`;
+            }
+            
+            // Копируем в буфер обмена
+            navigator.clipboard.writeText(presetText).then(() => {
+                showNotification('Пресет скопирован в буфер обмена');
+            }).catch(err => {
+                console.error('Ошибка копирования: ', err);
+                // Альтернативный способ для старых браузеров
+                const textarea = document.createElement('textarea');
+                textarea.value = presetText;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showNotification('Пресет скопирован в буфер обмена');
+            });
+        }
+        
+        // Применение пресета из текста - ИСПРАВЛЕНО
+        function applyPreset() {
+            const presetTextarea = document.getElementById('presetTextarea');
+            const presetText = presetTextarea.value.trim();
+            
+            if (!presetText) {
+                showNotification('Введите текст пресета!', false);
+                return;
+            }
+            
+            try {
+                // Простой парсинг текста пресета
+                const lines = presetText.split('\n');
+                let parsedStringCount = null;
+                const parsedTuning = [];
+                
+                for (const line of lines) {
+                    const trimmedLine = line.trim();
+                    
+                    // Парсим количество струн
+                    if (trimmedLine.startsWith('Струн:')) {
+                        parsedStringCount = parseInt(trimmedLine.split(':')[1]);
+                    }
+                    
+                    // Парсим настройки струн
+                    if (trimmedLine.startsWith('Струна')) {
+                        const parts = trimmedLine.split(':');
+                        if (parts.length >= 2) {
+                            const stringInfo = parts[1].trim();
+                            
+                            // Ищем ноту
+                            let noteIndex = -1;
+                            for (let i = 0; i < NOTES.length; i++) {
+                                if (stringInfo.includes(NOTES[i])) {
+                                    noteIndex = i;
+                                    break;
+                                }
+                            }
+                            
+                            // Ищем октаву
+                            let octave = 3; // По умолчанию
+                            const octaveMatch = stringInfo.match(/([A-G]#?)(-?\d+)/);
+                            if (octaveMatch && octaveMatch[2]) {
+                                octave = parseInt(octaveMatch[2]);
+                            }
+                            
+                            if (noteIndex !== -1) {
+                                parsedTuning.push({ note: noteIndex, octave: octave });
+                            }
+                        }
+                    }
+                }
+                
+                // Применяем парсенный пресет
+                if (parsedStringCount && parsedTuning.length === parsedStringCount) {
+                    stringCount = parsedStringCount;
+                    CONFIG.strings = stringCount;
+                    currentTuningWithOctaves = parsedTuning.reverse(); // Реверсируем, так как в массиве толстая -> тонкая
+                    currentTuning = currentTuningWithOctaves.map(item => item.note);
+                    
+                    createStringControls();
+                    updateTuning();
+                    
+                    // Автоматически определяем тонику
+                    autoDetectTonic();
+                    
+                    // Сбрасываем кнопки пресетов
+                    document.querySelectorAll('.action-btn').forEach(btn => btn.classList.remove('active'));
+                    
+                    // Очищаем поле ввода
+                    presetTextarea.value = '';
+                    
+                    showNotification('Пресет успешно применен');
+                } else {
+                    showNotification('Не удалось распознать пресет. Проверьте формат.', false);
+                }
+            } catch (error) {
+                console.error('Ошибка парсинга пресета:', error);
+                showNotification('Ошибка при применении пресета. Проверьте формат текста.', false);
+            }
+        }
+        
+        // Меню
+        function toggleMenu() {
+            const menu = document.getElementById('slideMenu');
+            const overlay = document.getElementById('menuOverlay');
+            
+            menu.classList.toggle('open');
+            overlay.classList.toggle('show');
+        }
+        
+        function closeMenu() {
+            const menu = document.getElementById('slideMenu');
+            const overlay = document.getElementById('menuOverlay');
+            
+            menu.classList.remove('open');
+            overlay.classList.remove('show');
+        }
+        
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
